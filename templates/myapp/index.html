@@ -3,10 +3,42 @@
 
 {% block body %}
 <div class="container mt-5">
-    {% for post in posts %}
-        {{post.title}} - {{ post.created_at|date:"Y-m-d H:i" }} <!--i: 분-->
-    {% empty %}
-        게시글이 없습니다.
-    {% endfor %}
+    <ul class="list-group">
+        <li class="list-group-item active" aria-current="true">Posts</li>
+        {% for post in posts %}
+            <a href="#" class="list-group-item list-group-item-action post-link" data-id="{{ post.id }}">
+                {{post.title}} - {{ post.created_at|date:"Y-m-d H:i" }}<!--i: 분-->
+            </a>
+            <div class="post-detail" style="display:none;"></div>
+        {% empty %}
+            게시글이 없습니다.
+        {% endfor %}
+    </ul>
+    
 </div>
+<script>
+    $(function() {
+        $(".post-link").on("click", function(e) {
+            e.preventDefault(); // 이전에 실행된 이벤트 동작 방지
+            var $link = $(this);
+            var postId = $link.data("id");
+            var $detailDiv = $link.next(".post-detail");
+            if ($detailDiv.is(":visible")) {
+                $detailDiv.slideUp();
+                return;
+            }
+            $.ajax({
+                url: "/myapp/detail_post",                
+                method: "GET",
+                data: { id: postId },
+                success: function(data) {
+                    $detailDiv.html(data.content).slideDown();
+                },
+                error: function() {
+                    $detailDiv.html("<div class='text-danger'>상세정보를 불러오지 못했습니다.</div>").slideDown();
+                }
+            })
+        })
+    })
+</script>
 {% endblock %}
